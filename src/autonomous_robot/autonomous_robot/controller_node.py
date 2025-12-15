@@ -3,10 +3,12 @@ from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
+
 class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
 
+        # Paraméterek
         self.declare_parameter('stop_distance', 0.5)
         self.declare_parameter('forward_speed', 0.2)
         self.declare_parameter('turn_speed', 0.8)
@@ -15,6 +17,7 @@ class ControllerNode(Node):
         self.forward_speed = float(self.get_parameter('forward_speed').value)
         self.turn_speed = float(self.get_parameter('turn_speed').value)
 
+        # Publisher / Subscriber
         self.cmd_pub = self.create_publisher(Twist, '/cmd_vel', 10)
         self.scan_sub = self.create_subscription(LaserScan, '/scan', self.on_scan, 10)
 
@@ -24,26 +27,47 @@ class ControllerNode(Node):
         )
 
     def on_scan(self, msg: LaserScan):
-        # védekezés: 0 / inf / nan értékek kiszűrése
-        valid = [r for r in msg.ranges if r > 0.0 and r != float('inf')]
+        """
+        TurtleBot3 / Gazebo LaserScan-ben sok érték 'inf' lehet (nincs találat).
+        Ez nem hiba: ilyenkor úgy kezeljük, mintha messze lenne az akadály.
+        """
+
+        valid = []
+        for r in msg.ranges:
+            # NaN szűrés: (NaN != NaN) igaz
+            if r != r:
+                continue
+            # 0 vagy negatív értékeket dobjuk
+            if r <= 0.0:
+                continue
+            # inf-et megtartjuk: "nincs találat"
+            valid.append(r)
+
         if not valid:
+            # nincs értelmezhető adat
             return
 
         min_dist = min(valid)
 
+        # Ha minden inf, akkor tekintsük úgy, hogy "max hatótávig tiszta"
+        if min_dist == float('inf'):
+            min_dist = msg.range_max if msg.range_max > 0.0 else 10.0
+
         twist = Twist()
+
         if min_dist < self.stop_distance:
-            # akadály közel: fordulj balra (helyben)
+            # Akadály közel -> fordulás
             twist.linear.x = 0.0
             twist.angular.z = self.turn_speed
             self.get_logger().info(f'Obstacle: {min_dist:.2f} m -> TURN')
         else:
-            # szabad: előre
+            # Tiszta -> előre
             twist.linear.x = self.forward_speed
             twist.angular.z = 0.0
             self.get_logger().info(f'Clear: {min_dist:.2f} m -> FORWARD')
 
         self.cmd_pub.publish(twist)
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -51,6 +75,7 @@ def main(args=None):
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
