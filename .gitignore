@@ -1,0 +1,18 @@
+# ROS2 build artifacts
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+
+# Other ROS2 projects
+src/smart_temperature/
+
