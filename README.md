@@ -44,150 +44,148 @@ A projekt az
 
 ## Szükséges csomagok telepítése
 
-```bash
+```
 sudo apt update
 sudo apt install ros-humble-turtlebot3* ros-humble-gazebo-ros-pkgs
-TurtleBot3 modell beállítása:
+```
 
-bash
-Kód másolása
-export TURTLEBOT3_MODEL=burger
-Workspace build
-bash
-Kód másolása
+###TurtleBot3 modell beállítása:
+
+```
+echo "export TURTLEBOT3_MODEL=burger" >> ~/.bashrc
+source ~/.bashrc
+
+```
+
+###Workspace build
+
+```
 cd ~/ros2_ws
 source /opt/ros/humble/setup.bash
 colcon build
-Program futtatása – lépésről lépésre
-⚠️ A rendszer KÉT terminált igényel.
-Mindkét terminált külön kell megnyitni.
 
-Terminál 1 – Robot, szimuláció és vezérlés
+```
+
+##Program futtatása – lépésről lépésre
+###A rendszer KÉT terminált igényel.
+###Mindkét terminált külön kell megnyitni.
+
+##Terminál 1 – Robot, szimuláció és vezérlés
 Ebben a terminálban indul el a teljes robot rendszer.
 
 1. Környezet betöltése
-bash
-Kód másolása
+
+```
 source /opt/ros/humble/setup.bash
 cd ~/ros2_ws
 source install/setup.bash
+```
+
 2. Teljes rendszer indítása (egyetlen parancs)
-bash
-Kód másolása
+
+```
 ros2 launch autonomous_robot tb3_headless.launch.py
+```
+
 Ez a launch fájl automatikusan elindítja:
 
-Gazebo szimulációt (headless)
-
-TurtleBot3 modellt
-
-robot_state_publisher node-ot
-
-statikus TF kapcsolatot (base_footprint → base_scan)
-
-autonóm vezérlőt (controller_node)
-
-biztonsági réteget (min_distance_node)
-
-/cmd_vel monitor node-ot
+- Gazebo szimulációt (headless)
+- TurtleBot3 modellt
+- robot_state_publisher node-ot
+- statikus TF kapcsolatot (base_footprint → base_scan)
+- autonóm vezérlőt (controller_node)
+- biztonsági réteget (min_distance_node)
+- /cmd_vel monitor node-ot
 
 3. Ellenőrzés
-bash
-Kód másolása
+
+```
 ros2 topic list | grep -E "scan|min_distance|collision|cmd_vel"
+```
+
 Elvárt topicok:
 
-/scan
+- /scan
+- /cmd_vel
+- /min_distance
+- /collision_warning
 
-/cmd_vel
 
-/min_distance
-
-/collision_warning
-
-Terminál 2 – Foxglove Bridge
+##Terminál 2 – Foxglove Bridge
 Ez a terminál a Foxglove Studio kapcsolathoz szükséges.
 
 1. Környezet betöltése
-bash
-Kód másolása
+
+```
 source /opt/ros/humble/setup.bash
+```
+
 2. Foxglove Bridge indítása
-bash
-Kód másolása
+
+```
 ros2 launch foxglove_bridge foxglove_bridge_launch.xml
+```
 WebSocket cím:
 
-arduino
-Kód másolása
+```
 ws://localhost:8765
+```
+
 Ellenőrzés:
 
-bash
-Kód másolása
+```
 ss -lntp | grep 8765
-Foxglove Studio használata
-Indítsd el a Foxglove Studio-t
+```
 
-Connect → Foxglove WebSocket
+##Foxglove Studio használata
+1. Indítsd el a Foxglove Studio-t
+2. Connect → Foxglove WebSocket
+3. Add meg a címet:
 
-Add meg a címet:
-
-arduino
-Kód másolása
+```
 ws://localhost:8765
-Ajánlott panelek
-3D panel
+```
 
-Fixed frame: odom vagy base_footprint
+##Ajánlott panelek
+###3D panel
 
-Bekapcsolva: /scan
+- Fixed frame: odom vagy base_footprint
+- Bekapcsolva: /scan
 
-Plot panel
+###Plot panel
 
-/cmd_vel.linear.x
+- /cmd_vel.linear.x
+- /cmd_vel.angular.z
+- /min_distance.data
 
-/cmd_vel.angular.z
+##Indicator panel
 
-/min_distance.data
+- /collision_warning.data
+- true → piros (STOP)
+- false → zöld (OK)
 
-Indicator panel
+##Működési logika
 
-/collision_warning.data
+- A LaserScan adatból kiszűrésre kerülnek:
+	- NaN értékek
+	- végtelen (inf) értékek
+	- range_min / range_max kívüli mérések
+- Meghatározásra kerül a legkisebb érvényes távolság
+- Ha min_distance < stop_distance:
+	- collision_warning = true
+	- a robot megáll és fordul
+- Egyébként:
+	- a robot előre halad
 
-true → piros (STOP)
+##Gyakori hibák
+###LaserScan nem látszik Foxglove-ban
 
-false → zöld (OK)
-
-Működési logika
-A LaserScan adatból kiszűrésre kerülnek:
-
-NaN értékek
-
-végtelen (inf) értékek
-
-range_min / range_max kívüli mérések
-
-Meghatározásra kerül a legkisebb érvényes távolság
-
-Ha min_distance < stop_distance:
-
-collision_warning = true
-
-a robot megáll és fordul
-
-Egyébként:
-
-a robot előre halad
-
-Gyakori hibák
-LaserScan nem látszik Foxglove-ban
-
-bash
-Kód másolása
+```
 ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 base_footprint base_scan
-Nem jelenik meg a min_distance
+```
 
-bash
-Kód másolása
+###Nem jelenik meg a min_distance
+
+```
 ros2 topic echo /min_distance --once
+```
