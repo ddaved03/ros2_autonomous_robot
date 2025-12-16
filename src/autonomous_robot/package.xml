@@ -7,6 +7,8 @@
   <maintainer email="daviddorina181@gmail.com">david</maintainer>
   <license>TODO: License declaration</license>
 
+  <exec_depend>std_msgs</exec_depend>
+
   <depend>rclpy</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>

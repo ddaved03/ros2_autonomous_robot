@@ -38,8 +38,11 @@ class ControllerNode(Node):
             if r != r:
                 continue
             # 0 vagy negatív értékeket dobjuk
-            if r <= 0.0:
+            if r < msg.range_min or r > msg.range_max:
                 continue
+            valid.append(r)
+
+
             # inf-et megtartjuk: "nincs találat"
             valid.append(r)
 

@@ -1,40 +1,35 @@
-# ROS2 autonóm robot – akadályészlelés és egyszerű akadálykerülés (AJR nagy féléves)
+# ROS 2 alapú autonóm robot akadálykerüléssel
 
-## Rövid leírás
-A projekt célja egy ROS 2 Humble alapú demonstráció elkészítése, ahol egy (szimulált) LiDAR szenzoradat (/scan) alapján a rendszer döntést hoz, és sebességparancsot publikál (/cmd_vel).
-A megoldás több node-ból áll, ROS2 topic kommunikációval, és launch fájllal egy parancsból indítható.
+Ez a projekt egy ROS 2 Humble alapú autonóm mobilrobot vezérlőt valósít meg, 
+amely lézerszkenner (LaserScan) adatok alapján képes egyszerű akadálykerülésre.
+A megoldás TurtleBot3 roboton, Gazebo szimulációban került megvalósításra.
 
-## Funkciók
-- `/scan` LaserScan feldolgozás (minimális távolság meghatározása)
-- Egyszerű vezérlő logika:
-  - ha akadály közel van → fordulás
-  - ha szabad a tér → előrehaladás
-- `/cmd_vel` kiadása és monitorozása
-- Egy parancsos indítás `ros2 launch` segítségével
+A projekt célja az autonóm járművek és robotok programozásához szükséges alapvető
+ROS 2 kommunikációs mechanizmusok (publisher, subscriber, launch fájlok) gyakorlása.
 
-## Rendszerfelépítés (node-ok és topic-ok)
-**Node-ok:**
-- `fake_scan_publisher` – teszt LaserScan adatok publikálása `/scan`-ra
-- `controller_node` – döntési logika `/scan` alapján, publikál `/cmd_vel`-re
-- `cmd_vel_monitor` – `/cmd_vel` monitorozása és logolása
-- `sensor_node` – `/scan` minimális távolság logolása (külön futtatható)
+---
 
-**Topic-ok:**
-- `/scan` (`sensor_msgs/msg/LaserScan`)
-- `/cmd_vel` (`geometry_msgs/msg/Twist`)
+## Funkcionalitás
 
-Egyszerű adatfolyam:
-`fake_scan_publisher` → `/scan` → `controller_node` → `/cmd_vel` → `cmd_vel_monitor`
+- TurtleBot3 robot szimuláció Gazebo környezetben (headless módban)
+- LaserScan adatok feldolgozása (`/scan`)
+- Egyszerű döntési logika:
+  - akadály esetén fordulás
+  - szabad térben előrehaladás
+- Sebességparancsok publikálása `/cmd_vel` topicra
+- Részletes konzolos logolás a döntésekről
+
+---
 
 ## Követelmények
-- Ubuntu 22.04 / WSL2
-- ROS 2 Humble
-- colcon
 
-## Build
+- Ubuntu 22.04
+- ROS 2 Humble
+- Gazebo (ROS 2 integrációval)
+- turtlebot3 csomagok
+
+Szükséges csomagok telepítése:
 ```bash
-cd ~/ros2_ws
-source /opt/ros/humble/setup.bash
-colcon build --packages-select autonomous_robot
-source install/setup.bash
+sudo apt update
+sudo apt install ros-humble-turtlebot3* ros-humble-gazebo-ros-pkgs
 

@@ -32,6 +32,7 @@ setup(
         'fake_scan_publisher = autonomous_robot.fake_scan_publisher:main',
         'controller_node = autonomous_robot.controller_node:main',
         'cmd_vel_monitor = autonomous_robot.cmd_vel_monitor:main',
+        'min_distance_node = autonomous_robot.min_distance_node:main',
 
     ],
 },
