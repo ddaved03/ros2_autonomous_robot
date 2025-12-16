@@ -49,28 +49,26 @@ sudo apt update
 sudo apt install ros-humble-turtlebot3* ros-humble-gazebo-ros-pkgs
 ```
 
-###TurtleBot3 modell beállítása:
+### TurtleBot3 modell beállítása:
 
 ```
 echo "export TURTLEBOT3_MODEL=burger" >> ~/.bashrc
 source ~/.bashrc
-
 ```
 
-###Workspace build
+### Workspace build
 
 ```
 cd ~/ros2_ws
 source /opt/ros/humble/setup.bash
 colcon build
-
 ```
 
-##Program futtatása – lépésről lépésre
-###A rendszer KÉT terminált igényel.
-###Mindkét terminált külön kell megnyitni.
+## Program futtatása – lépésről lépésre
+### A rendszer KÉT terminált igényel.
+### Mindkét terminált külön kell megnyitni.
 
-##Terminál 1 – Robot, szimuláció és vezérlés
+## Terminál 1 – Robot, szimuláció és vezérlés
 Ebben a terminálban indul el a teljes robot rendszer.
 
 1. Környezet betöltése
@@ -111,7 +109,7 @@ Elvárt topicok:
 - /collision_warning
 
 
-##Terminál 2 – Foxglove Bridge
+## Terminál 2 – Foxglove Bridge
 Ez a terminál a Foxglove Studio kapcsolathoz szükséges.
 
 1. Környezet betöltése
@@ -137,7 +135,7 @@ Ellenőrzés:
 ss -lntp | grep 8765
 ```
 
-##Foxglove Studio használata
+## Foxglove Studio használata
 1. Indítsd el a Foxglove Studio-t
 2. Connect → Foxglove WebSocket
 3. Add meg a címet:
@@ -146,25 +144,25 @@ ss -lntp | grep 8765
 ws://localhost:8765
 ```
 
-##Ajánlott panelek
-###3D panel
+## Ajánlott panelek
+### 3D panel
 
 - Fixed frame: odom vagy base_footprint
 - Bekapcsolva: /scan
 
-###Plot panel
+### Plot panel
 
 - /cmd_vel.linear.x
 - /cmd_vel.angular.z
 - /min_distance.data
 
-##Indicator panel
+## Indicator panel
 
 - /collision_warning.data
 - true → piros (STOP)
 - false → zöld (OK)
 
-##Működési logika
+## Működési logika
 
 - A LaserScan adatból kiszűrésre kerülnek:
 	- NaN értékek
@@ -177,14 +175,14 @@ ws://localhost:8765
 - Egyébként:
 	- a robot előre halad
 
-##Gyakori hibák
-###LaserScan nem látszik Foxglove-ban
+## Gyakori hibák
+### LaserScan nem látszik Foxglove-ban
 
 ```
 ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 base_footprint base_scan
 ```
 
-###Nem jelenik meg a min_distance
+### Nem jelenik meg a min_distance
 
 ```
 ros2 topic echo /min_distance --once
